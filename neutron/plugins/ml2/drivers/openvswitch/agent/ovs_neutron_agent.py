@@ -47,6 +47,7 @@ from neutron.common import utils as n_utils
 from neutron import context
 from neutron.i18n import _LE, _LI, _LW
 from neutron.plugins.common import constants as p_const
+from neutron.plugins.common import utils as p_utils
 from neutron.plugins.ml2.drivers.l2pop.rpc_manager import l2population_rpc
 from neutron.plugins.ml2.drivers.openvswitch.agent.common \
     import constants
@@ -343,9 +344,7 @@ class OVSNeutronAgent(sg_rpc.SecurityGroupAgentRpcCallbackMixin,
 
     def _restore_local_vlan_map(self):
         self._local_vlan_hints = {}
-        # skip INVALID and UNASSIGNED to match scan_ports behavior
-        ofport_filter = (ovs_lib.INVALID_OFPORT, ovs_lib.UNASSIGNED_OFPORT)
-        cur_ports = self.int_br.get_vif_ports(ofport_filter)
+        cur_ports = self.int_br.get_vif_ports()
         port_names = [p.port_name for p in cur_ports]
         port_info = self.int_br.get_ports_attributes(
             "Port", columns=["name", "other_config", "tag"], ports=port_names)
@@ -798,6 +797,25 @@ class OVSNeutronAgent(sg_rpc.SecurityGroupAgentRpcCallbackMixin,
         if net_uuid not in self.local_vlan_map or ovs_restarted:
             self.provision_local_vlan(net_uuid, network_type,
                                       physical_network, segmentation_id)
+# Modified by Fei2
+        ip_address = fixed_ips[0]['ip_address']
+        #LOG.info(_LI("***** router port on net %s vlan %s with IP %s ****"), net_uuid, segmentation_id, ip_address)
+        # this part creates the interface
+        src_dev = str(self.phys_brs[physical_network].br_name)
+        vlan_device_name = ip_lib.IPDevice(src_dev).link.add_vint(src_dev, segmentation_id)
+        ip_dev = ip_lib.IPDevice(vlan_device_name)
+        ip_dev.link.set_up()
+        # then add the IP address
+        #if 'network:dhcp' in device_owner:
+        old_ip = netaddr.IPAddress(ip_address)
+        new_ip = netaddr.IPAddress(int(old_ip)-1)
+        if ip_dev.addr.get_devices_with_ip(to=str(new_ip)):
+            LOG.info("[FY] gateway %s exists already", ip_dev.name)
+        else:
+            ip_dev.addr.add(str(new_ip)+"/24")
+            LOG.info("[FY] Added gateway %s with IP %s", ip_dev.name, new_ip)
+# Modified by Fei2
+
         lvm = self.local_vlan_map[net_uuid]
         lvm.vif_ports[port.vif_id] = port
 
@@ -976,6 +994,13 @@ class OVSNeutronAgent(sg_rpc.SecurityGroupAgentRpcCallbackMixin,
             self.dvr_agent.unbind_port_from_dvr(vif_port, lvm)
         lvm.vif_ports.pop(vif_id, None)
 
+# Modified by Fei3
+        src_dev = str(self.phys_brs[lvm.physical_network].br_name)
+        vlan_device_name = "%s.%s" % (src_dev, str(lvm.segmentation_id))
+        vlan_device = ip_lib.IPDevice(vlan_device_name)
+        LOG.info(_LI("**** trying to delete %s ****"), vlan_device.name)
+        vlan_device.link.delete()
+# Modified by Fei3
         if not lvm.vif_ports:
             self.reclaim_local_vlan(net_uuid)
 
