@@ -799,21 +799,22 @@ class OVSNeutronAgent(sg_rpc.SecurityGroupAgentRpcCallbackMixin,
                                       physical_network, segmentation_id)
 # Modified by Fei2
         ip_address = fixed_ips[0]['ip_address']
-        #LOG.info(_LI("***** router port on net %s vlan %s with IP %s ****"), net_uuid, segmentation_id, ip_address)
-        # this part creates the interface
-        src_dev = str(self.phys_brs[physical_network].br_name)
-        vlan_device_name = ip_lib.IPDevice(src_dev).link.add_vint(src_dev, segmentation_id)
-        ip_dev = ip_lib.IPDevice(vlan_device_name)
-        ip_dev.link.set_up()
-        # then add the IP address
-        #if 'network:dhcp' in device_owner:
-        old_ip = netaddr.IPAddress(ip_address)
-        new_ip = netaddr.IPAddress(int(old_ip)-1)
-        if ip_dev.addr.get_devices_with_ip(to=str(new_ip)):
-            LOG.info("[FY] gateway %s exists already", ip_dev.name)
-        else:
-            ip_dev.addr.add(str(new_ip)+"/24")
-            LOG.info("[FY] Added gateway %s with IP %s", ip_dev.name, new_ip)
+        if segmentation_id is not None:
+            #LOG.info(_LI("***** router port on net %s vlan %s with IP %s ****"), net_uuid, segmentation_id, ip_address)
+            # this part creates the interface
+            src_dev = str(self.phys_brs[physical_network].br_name)
+            vlan_device_name = ip_lib.IPDevice(src_dev).link.add_vint(src_dev, segmentation_id)
+            ip_dev = ip_lib.IPDevice(vlan_device_name)
+            ip_dev.link.set_up()
+            # then add the IP address
+            #if 'network:dhcp' in device_owner:
+            old_ip = netaddr.IPAddress(ip_address)
+            new_ip = netaddr.IPAddress(int(old_ip)-1)
+            if ip_dev.addr.get_devices_with_ip(to=str(new_ip)):
+                LOG.info("[FY] gateway %s exists already", ip_dev.name)
+            else:
+                ip_dev.addr.add(str(new_ip)+"/24")
+                LOG.info("[FY] Added gateway %s with IP %s", ip_dev.name, new_ip)
 # Modified by Fei2
 
         lvm = self.local_vlan_map[net_uuid]
