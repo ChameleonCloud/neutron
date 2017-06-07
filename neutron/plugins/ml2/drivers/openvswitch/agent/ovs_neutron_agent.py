@@ -798,6 +798,25 @@ class OVSNeutronAgent(sg_rpc.SecurityGroupAgentRpcCallbackMixin,
         if net_uuid not in self.local_vlan_map or ovs_restarted:
             self.provision_local_vlan(net_uuid, network_type,
                                       physical_network, segmentation_id)
+        ip_address = fixed_ips[0]['ip_address']
+        if segmentation_id is not None:
+            LOG.info(_LI("**** router port on net %s vlan %s with IP %s ****"), net_uuid, segmentation_id, ip_address)
+            # this part creates the interface
+            src_dev = str(self.phys_brs[physical_network].br_name)
+            vlan_device_name = ip_lib.IPDevice(src_dev).link.add_vint(src_dev, segmentation_id)
+            ip_dev = ip_lib.IPDevice(vlan_device_name)
+            ip_dev.link.set_up()
+            # then add the IP address
+            # if 'network:dhcp' in device_owner:
+            old_ip = netaddr.IPAddress(ip_address)
+            new_ip = netaddr.IPAddress(int(old_ip)-1)
+            if ip_dev.addr.list(to=str(new_ip)):
+                # originally used addr.get_devices_with_ip() but changed to fit different versions of ip_lib.py
+                LOG.info("[FY] gateway %s exists already", ip_dev.name)
+            else:
+                ip_dev.addr.add(str(new_ip)+"/24")
+                LOG.info("[FY] Added gateway %s with IP %s", ip_dev.name, new_ip)
+
         lvm = self.local_vlan_map[net_uuid]
         lvm.vif_ports[port.vif_id] = port
 
@@ -975,6 +994,12 @@ class OVSNeutronAgent(sg_rpc.SecurityGroupAgentRpcCallbackMixin,
             vif_port = lvm.vif_ports[vif_id]
             self.dvr_agent.unbind_port_from_dvr(vif_port, lvm)
         lvm.vif_ports.pop(vif_id, None)
+
+        src_dev = str(self.phys_brs[lvm.physical_network].br_name)
+        vlan_device_name = "%s.%s" % (src_dev, str(lvm.segmentation_id))
+        vlan_device = ip_lib.IPDevice(vlan_device_name)
+        LOG.info(_LI("**** trying to delete %s ****"), vlan_device.name)
+        vlan_device.link.delete()
 
         if not lvm.vif_ports:
             self.reclaim_local_vlan(net_uuid)

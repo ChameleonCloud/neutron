@@ -534,6 +534,14 @@ class IpLinkCommand(IpDeviceCommandBase):
         retval = dict(zip(keys, values))
         return retval
 
+    def add_vint(self, src_dev, segmentation_id):
+        vlan_device_name = "%s.%s" % (src_dev, str(segmentation_id))
+        if not device_exists(vlan_device_name):
+            self._as_root([], ('add', 'link', src_dev, 'name',
+                vlan_device_name, 'type', 'vlan', 'id', str(segmentation_id)))
+        else:
+            LOG.exception(_LE("%s exists already"), vlan_device_name)
+        return vlan_device_name
 
 class IpAddrCommand(IpDeviceCommandBase):
     COMMAND = 'addr'
