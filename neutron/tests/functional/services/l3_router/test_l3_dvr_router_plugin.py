@@ -255,6 +255,8 @@ class L3DvrTestCase(L3DvrTestCaseBase):
                            'router_id': router['id'],
                            'port_id': int_port['port']['id'],
                            'tenant_id': int_port['port']['tenant_id'],
+                           'subnet_id': None,
+                           'floating_ip_address': None,
                            'dns_name': '', 'dns_domain': ''}
             with mock.patch.object(
                     self.l3_plugin, '_l3_rpc_notifier') as l3_notif:
@@ -320,6 +322,8 @@ class L3DvrTestCase(L3DvrTestCaseBase):
             floating_ip = {'floating_network_id': ext_net_id,
                            'router_id': router1['id'],
                            'port_id': int_port1['port']['id'],
+                           'subnet_id': None,
+                           'floating_ip_address': None,
                            'tenant_id': int_port1['port']['tenant_id'],
                            'dns_name': '', 'dns_domain': ''}
             floating_ip = self.l3_plugin.create_floatingip(
@@ -379,6 +383,8 @@ class L3DvrTestCase(L3DvrTestCaseBase):
             floating_ip = {'floating_network_id': ext_net_id,
                            'router_id': router['id'],
                            'port_id': int_port['port']['id'],
+                           'subnet_id': None,
+                           'floating_ip_address': None,
                            'tenant_id': int_port['port']['tenant_id'],
                            'dns_name': '', 'dns_domain': ''}
             floating_ip = self.l3_plugin.create_floatingip(
@@ -517,7 +523,9 @@ class L3DvrTestCase(L3DvrTestCaseBase):
                 floating_ip = {'floating_network_id': ext_net['network']['id'],
                                'router_id': router['id'],
                                'port_id': vrrp_port['port']['id'],
-                               'tenant_id': vrrp_port['port']['tenant_id']}
+                               'subnet_id': None,
+                               'floating_ip_address': None,
+                               'tenant_id': vrrp_port['port']['tenant_id'],}
                 floating_ip = self.l3_plugin.create_floatingip(
                     self.context, {'floatingip': floating_ip})
                 vrrp_port_db = self.core_plugin.get_port(
@@ -668,6 +676,8 @@ class L3DvrTestCase(L3DvrTestCaseBase):
                 floating_ip = {'floating_network_id': ext_net['network']['id'],
                                'router_id': router['id'],
                                'port_id': vrrp_port['port']['id'],
+                               'subnet_id': None,
+                               'floating_ip_address': None,
                                'tenant_id': vrrp_port['port']['tenant_id']}
                 floating_ip = self.l3_plugin.create_floatingip(
                     self.context, {'floatingip': floating_ip})
@@ -761,6 +771,8 @@ class L3DvrTestCase(L3DvrTestCaseBase):
                 floating_ip = {'floating_network_id': ext_net['network']['id'],
                                'router_id': router['id'],
                                'port_id': vrrp_port['port']['id'],
+                               'subnet_id': None,
+                               'floating_ip_address': None,
                                'tenant_id': vrrp_port['port']['tenant_id']}
                 floating_ip = self.l3_plugin.create_floatingip(
                     self.context, {'floatingip': floating_ip})
@@ -859,7 +871,9 @@ class L3DvrTestCase(L3DvrTestCaseBase):
                 floating_ip = {'floating_network_id': ext_net['network']['id'],
                                'router_id': router['id'],
                                'port_id': vrrp_port['port']['id'],
-                               'tenant_id': vrrp_port['port']['tenant_id']}
+                               'subnet_id': None,
+                               'floating_ip_address': None,
+                               'tenant_id': vrrp_port['port']['tenant_id'],}
                 floating_ip = self.l3_plugin.create_floatingip(
                     self.context, {'floatingip': floating_ip})
 
@@ -1119,6 +1133,8 @@ class L3DvrTestCase(L3DvrTestCaseBase):
                 floating_ip = {'floating_network_id': ext_net_id,
                                'router_id': router['id'],
                                'port_id': vm_port['port']['id'],
+                               'subnet_id': None,
+                               'floating_ip_address': None,
                                'tenant_id': vm_port['port']['tenant_id'],
                                'dns_name': '', 'dns_domain': ''}
                 floating_ip = self.l3_plugin.create_floatingip(
