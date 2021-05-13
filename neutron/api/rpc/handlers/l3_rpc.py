@@ -47,7 +47,8 @@ class L3RpcCallback(object):
     # 1.10 Added update_all_ha_network_port_statuses
     # 1.11 Added get_host_ha_router_count
     # 1.12 Added get_networks
-    target = oslo_messaging.Target(version='1.12')
+    # 1.13 Added get_port
+    target = oslo_messaging.Target(version='1.13')
 
     @property
     def plugin(self):
@@ -364,3 +365,9 @@ class L3RpcCallback(object):
         # networking-mlnx.
         return self.plugin.get_networks(
             context, filters=filters, fields=fields)
+
+    def get_port(self, context, port_id, fields=None):
+        """Retrieve a port representation."""
+        # NOTE(jasonandersonatuchicago): This RPC is being used by out of tree
+        # interface drivers.
+        return self.plugin.get_port(context, port_id, fields=fields)

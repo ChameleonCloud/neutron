@@ -211,6 +211,17 @@ class L3PluginApi(object):
         return cctxt.call(
             context, 'get_networks', filters=filters, fields=fields)
 
+    def get_port(self, context, port_id, fields=None):
+        """Get port details.
+
+        :param context: Security context
+        :param port_id: The ID of the port.
+        :return: The port representation.
+        """
+        cctxt = self.client.prepare(version='1.13')
+        return cctxt.call(
+            context, 'get_port', port_id, fields=fields)
+
 
 class RouterFactory(object):
 
@@ -290,7 +301,9 @@ class L3NATAgent(ha.AgentMixin,
         self.driver = common_utils.load_interface_driver(
             self.conf,
             get_networks_callback=functools.partial(
-                self.plugin_rpc.get_networks, self.context))
+                self.plugin_rpc.get_networks, self.context),
+            get_port_callback=functools.partial(
+                self.plugin_rpc.get_port, self.context))
 
         self.fullsync = True
         self.sync_routers_chunk_size = SYNC_ROUTERS_MAX_CHUNK_SIZE
