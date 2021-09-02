@@ -499,8 +499,7 @@ class NeutronDbPluginV2(db_base_plugin_common.DbBasePluginCommon,
                 network_db = self._get_network(context, id)
                 network = self._make_network_dict(network_db, context=context)
                 registry.notify(resources.NETWORK, events.PRECOMMIT_DELETE,
-                                self, context=context, network_id=id,
-                                network=network)
+                                self, context=context, network_id=id)
                 # We expire network_db here because precommit deletion
                 # might have left the relationship stale, for example,
                 # if we deleted a segment.

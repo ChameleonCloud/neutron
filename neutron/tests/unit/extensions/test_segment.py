@@ -419,8 +419,7 @@ class TestSegment(SegmentTestCase):
                                events.PRECOMMIT_DELETE,
                                mock.ANY,
                                context=mock.ANY,
-                               network_id=mock.ANY,
-                               network=mock.ANY)
+                               network_id=mock.ANY)
 
 
 class TestSegmentML2(SegmentTestCase):
